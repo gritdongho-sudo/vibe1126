@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>바이브 코딩(Vibe Coding) 교원 연수 참가 안내</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-color: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.78);
+      --card-border: rgba(96, 165, 250, 0.28);
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.45);
+      --accent: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --toc-width: 240px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.7;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* =========================================
+       뒷배경 흐르는 코드 레이어 (순수 CSS 방식)
+       ========================================= */
+    .code-bg-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      display: flex;
+      justify-content: space-around;
+      gap: 24px;
+      padding: 0 16px;
+    }
+
+    .code-column {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 2.1;
+      white-space: nowrap;
+      color: rgba(96, 165, 250, 0.26); /* 배경 코드 선명도 */
+      text-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+      user-select: none;
+      will-change: transform;
+    }
+
+    .code-column.green {
+      color: rgba(52, 211, 153, 0.22);
+      text-shadow: 0 0 8px rgba(16, 185, 129, 0.22);
+    }
+
+    .code-column.scroll-down {
+      animation: codeFlowDown 28s linear infinite;
+    }
+
+    .code-column.scroll-up {
+      animation: codeFlowUp 34s linear infinite;
+    }
+
+    .code-column.scroll-slow {
+      animation: codeFlowDown 42s linear infinite;
+    }
+
+    @keyframes codeFlowDown {
+      0% { transform: translateY(-50%); }
+      100% { transform: translateY(0%); }
+    }
+
+    @keyframes codeFlowUp {
+      0% { transform: translateY(0%); }
+      100% { transform: translateY(-50%); }
+    }
+
+    /* 전체 레이아웃 (목차 + 본문) */
+    .page-wrapper {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      gap: 48px;
+    }
+
+    /* 스티키 목차 (TOC) */
+    .toc-sidebar {
+      width: var(--toc-width);
+      flex-shrink: 0;
+    }
+
+    .toc-sticky {
+      position: sticky;
+      top: 40px;
+      background: rgba(15, 22, 36, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .toc-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-left: 12px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: all 0.25s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .toc-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* 활성화된 목차 불 들어오는 효과 */
+    .toc-link.active {
+      color: #ffffff;
+      font-weight: 700;
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.06));
+      border-left: 3px solid var(--primary);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .toc-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+      transition: all 0.25s ease;
+    }
+
+    .toc-link.active .toc-dot {
+      background-color: #60a5fa;
+      box-shadow: 0 0 8px #60a5fa, 0 0 14px var(--primary);
+      transform: scale(1.25);
+    }
+
+    /* 메인 콘텐츠 영역 */
+    .content-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 스크롤 등장 애니메이션 섹션 */
+    .scroll-section {
+      padding: 64px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .scroll-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .scroll-section:first-child {
+      padding-top: 16px;
+    }
+
+    .scroll-section:last-child {
+      border-bottom: none;
+    }
+
+    /* 배지 & 타이포그래피 */
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.85);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      backdrop-filter: blur(6px);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.7));
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #ffffff;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+    }
+
+    .section-desc {
+      color: #e2e8f0;
+      font-size: 1.05rem;
+      margin-bottom: 32px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+    }
+
+    /* 카드 그리드 */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(59, 130, 246, 0.65);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .card-icon {
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #f1f5f9;
+    }
+
+    .card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    /* 통계 대시보드 스타일 */
+    .stats-highlight {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-box {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #60a5fa;
+      line-height: 1.2;
+    }
+
+    .stat-num.green {
+      color: #34d399;
+    }
+
+    .stat-label {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* 가로 막대 차트 */
+    .bar-chart-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .bar-item {
+      margin-bottom: 18px;
+    }
+
+    .bar-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      width: 0;
+      transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 학교급 비율 스택 바 */
+    .school-dist {
+      display: flex;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 16px 0 12px;
+      gap: 3px;
+    }
+
+    .dist-mid { width: 63.6%; background: #3b82f6; }
+    .dist-high { width: 27.1%; background: #10b981; }
+    .dist-elem { width: 8.5%; background: #f59e0b; }
+    .dist-etc { width: 0.8%; background: #8b5cf6; }
+
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    /* 생생 후기 카드 */
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .review-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .review-tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #34d399;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .review-text {
+      font-size: 0.94rem;
+      color: #e2e8f0;
+      font-style: italic;
+    }
+
+    /* 커리큘럼 스텝 */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .step-num {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* 마지막 신청 CTA 박스 */
+    .cta-box {
+      background: linear-gradient(135deg, rgba(23, 37, 84, 0.82), rgba(6, 78, 59, 0.72));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(96, 165, 250, 0.5);
+      border-radius: 22px;
+      padding: 44px 32px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .cta-box h2 {
+      font-size: 1.9rem;
+      margin-bottom: 12px;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 24px;
+      padding: 18px 36px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: #ffffff;
+      background: linear-gradient(90deg, #2563eb, #10b981);
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 10px 28px var(--primary-glow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 14px 36px rgba(16, 185, 129, 0.5);
+    }
+
+    /* 모바일 대응 */
+    @media (max-width: 860px) {
+      .page-wrapper {
+        flex-direction: column;
+        padding: 16px;
+        gap: 20px;
+      }
+
+      .toc-sidebar {
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .toc-sticky {
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      .toc-title {
+        display: none;
+      }
+
+      .toc-list {
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 8px;
+      }
+
+      .toc-link {
+        white-space: nowrap;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+
+      .toc-link.active {
+        border-left: none;
+        border-bottom: 3px solid var(--primary);
+      }
+
+      h1 {
+        font-size: 1.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 뒷배경 흐르는 코드 레이어 (순수 CSS 애니메이션) -->
+  <div class="code-bg-layer" aria-hidden="true">
+    <div class="code-column scroll-down">
+      const vibeCoding = true;<br>
+      function doGet(e) {<br>
+      &nbsp;&nbsp;return HtmlService.createHtmlOutputFromFile('Index');<br>
+      }<br>
+      const ss = SpreadsheetApp.getActiveSpreadsheet();<br>
+      const sheet = ss.getSheetByName('학생기록');<br>
+      sheet.appendRow([new Date(), name, score]);<br>
+      const response = await gemini.generateContent(prompt);<br>
+      if (satisfaction === 5.0) { status = "PERFECT"; }<br>
+      export const createWebApp = (idea) =&gt; deploy(idea);<br>
+      const papsScore = calcScore(run50m, sitUp);<br>
+      // 반복 루프용 복제 블록<br>
+      const vibeCoding = true;<br>
+      function doGet(e) {<br>
+      &nbsp;&nbsp;return HtmlService.createHtmlOutputFromFile('Index');<br>
+      }<br>
+      const ss = SpreadsheetApp.getActiveSpreadsheet();<br>
+      const sheet = ss.getSheetByName('학생기록');<br>
+      sheet.appendRow([new Date(), name, score]);<br>
+      const response = await gemini.generateContent(prompt);<br>
+      if (satisfaction === 5.0) { status = "PERFECT"; }<br>
+      export const createWebApp = (idea) =&gt; deploy(idea);<br>
+      const papsScore = calcScore(run50m, sitUp);<br>
+    </div>
+
+    <div class="code-column green scroll-up">
+      &lt;div class="student-feedback-card"&gt;<br>
+      &nbsp;&nbsp;&lt;h3&gt;AI 개별 맞춤형 피드백&lt;/h3&gt;<br>
+      &nbsp;&nbsp;&lt;p id="ai-result"&gt;데이터 분석 완료&lt;/p&gt;<br>
+      &lt;/div&gt;<br>
+      fetch(API_URL, { method: 'POST', body: payload })<br>
+      &nbsp;&nbsp;.then(res =&gt; res.json())<br>
+      &nbsp;&nbsp;.then(data =&gt; renderDashboard(data));<br>
+      const apiKey = PropertiesService.getScriptProperties();<br>
+      // 코딩 몰라도 자연어로 만드는 수업 웹앱<br>
+      const teachers = 118;<br>
+      const recommendRate = "99.3%";<br>
+      // 반복 루프용 복제 블록<br>
+      &lt;div class="student-feedback-card"&gt;<br>
+      &nbsp;&nbsp;&lt;h3&gt;AI 개별 맞춤형 피드백&lt;/h3&gt;<br>
+      &nbsp;&nbsp;&lt;p id="ai-result"&gt;데이터 분석 완료&lt;/p&gt;<br>
+      &lt;/div&gt;<br>
+      fetch(API_URL, { method: 'POST', body: payload })<br>
+      &nbsp;&nbsp;.then(res =&gt; res.json())<br>
+      &nbsp;&nbsp;.then(data =&gt; renderDashboard(data));<br>
+      const apiKey = PropertiesService.getScriptProperties();<br>
+      // 코딩 몰라도 자연어로 만드는 수업 웹앱<br>
+      const teachers = 118;<br>
+      const recommendRate = "99.3%";<br>
+    </div>
+
+    <div class="code-column scroll-slow">
+      function onFormSubmit(e) {<br>
+      &nbsp;&nbsp;const values = e.namedValues;<br>
+      &nbsp;&nbsp;sendAutoFeedbackEmail(values);<br>
+      }<br>
+      const prompt = "학생 수행평가 결과를 분석해줘";<br>
+      const model = genAI.getGenerativeModel({ model: "gemini" });<br>
+      google.script.run.withSuccessHandler(onSave).saveData(form);<br>
+      let classRecords = sheet.getDataRange().getValues();<br>
+      return ContentService.createTextOutput(JSON.stringify(out));<br>
+      // 반복 루프용 복제 블록<br>
+      function onFormSubmit(e) {<br>
+      &nbsp;&nbsp;const values = e.namedValues;<br>
+      &nbsp;&nbsp;sendAutoFeedbackEmail(values);<br>
+      }<br>
+      const prompt = "학생 수행평가 결과를 분석해줘";<br>
+      const model = genAI.getGenerativeModel({ model: "gemini" });<br>
+      google.script.run.withSuccessHandler(onSave).saveData(form);<br>
+      let classRecords = sheet.getDataRange().getValues();<br>
+      return ContentService.createTextOutput(JSON.stringify(out));<br>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- 좌측 스티키 목차 -->
+    <aside class="toc-sidebar">
+      <nav class="toc-sticky" aria-label="행사 안내 목차">
+        <div class="toc-title">목차 · CONTENTS</div>
+        <ul class="toc-list">
+          <li><a href="#intro" class="toc-link active"><span class="toc-dot"></span>1. 연수 소개</a></li>
+          <li><a href="#stats" class="toc-link"><span class="toc-dot"></span>2. 실제 만족도 통계</a></li>
+          <li><a href="#reviews" class="toc-link"><span class="toc-dot"></span>3. 참여 교사 생생 후기</a></li>
+          <li><a href="#curriculum" class="toc-link"><span class="toc-dot"></span>4. 핵심 실습 커리큘럼</a></li>
+          <li><a href="#apply" class="toc-link"><span class="toc-dot"></span>5. 참가 신청하기</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- 우측 스크롤 본문 -->
+    <main class="content-main">
+
+      <!-- 섹션 1: 연수 소개 -->
+      <section id="intro" class="scroll-section visible">
+        <span class="badge">AI · 에듀테크 교원 실전 워크숍</span>
+        <h1>코딩을 몰라도 내 손으로 만드는<br />수업 맞춤형 웹앱, 바이브 코딩</h1>
+        <p class="section-desc">
+          복잡한 코딩 문법 대신 자연어와 AI(Gemini·Apps Script)를 연결해, 
+          우리 반 학생들의 기록 측정·누적·개별 피드백까지 한 번에 해결하는 나만의 수업 도구를 직접 제작합니다.
+        </p>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">🚀</div>
+            <h3>기초부터 실전 배포까지</h3>
+            <p>코딩 입문자도 개념과 작동 원리를 이해하고 바로 작동하는 웹앱을 완성합니다.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">📊</div>
+            <h3>구글 시트 실시간 연동</h3>
+            <p>일회성 활동이 아닌 학생별 수행·PAPS 데이터를 자동 저장하고 누적 관리합니다.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🤖</div>
+            <h3>AI 맞춤 피드백 자동화</h3>
+            <p>API 연결을 통해 학생 기록에 따른 개별 맞춤형 피드백 앱을 구현합니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 섹션 2: 실제 설문 통계 -->
+      <section id="stats" class="scroll-section">
+        <span class="badge">DATA PROOF · 실제 사후설문 결과</span>
+        <h2>118명의 선생님이 증명한 압도적 만족도</h2>
+        <p class="section-desc">
+          기존 「바이브 코딩 연수」 참여 교사 118명의 실제 사후설문 응답 데이터를 가감 없이 공개합니다.
+        </p>
+
+        <div class="stats-highlight">
+          <div class="stat-box">
+            <div class="stat-num">5.00 <span style="font-size:1rem;color:#94a3b8">/ 5.0</span></div>
+            <div class="stat-label">전체 연수 만족도 (100% 만점)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num green">99.3%</div>
+            <div class="stat-label">동료 교사 추천 의향 (4.97점)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">99.2%</div>
+            <div class="stat-label">실제 수업 도움도 (4.96점)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num green">118명</div>
+            <div class="stat-label">누적 설문 응답 교원 수</div>
+          </div>
+        </div>
+
+        <div class="bar-chart-card">
+          <h3 style="margin-bottom:20px; font-size:1.1rem;">항목별 세부 평가 지표 (5점 만점 기준)</h3>
+
+          <div class="bar-item">
+            <div class="bar-header">
+              <span>전체 연수 만족도 (118명 전원 5점)</span>
+              <span style="color:#60a5fa;">5.00점 (100%)</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" data-width="100%"></div></div>
+          </div>
+
+          <div class="bar-item">
+            <div class="bar-header">
+              <span>강사의 전문성 및 연수 진행</span>
+              <span style="color:#60a5fa;">4.99점 (99.8%)</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" data-width="99.8%"></div></div>
+          </div>
+
+          <div class="bar-item">
+            <div class="bar-header">
+              <span>동료 교사에게 추천할 의향</span>
+              <span style="color:#34d399;">4.97점 (99.3%)</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" data-width="99.3%"></div></div>
+          </div>
+
+          <div class="bar-item">
+            <div class="bar-header">
+              <span>연수 이후 AI·에듀테크 활용 의향</span>
+              <span style="color:#34d399;">4.97점 (99.3%)</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" data-width="99.3%"></div></div>
+          </div>
+
+          <div class="bar-item">
+            <div class="bar-header">
+              <span>실제 수업에 도움이 될 것 같다</span>
+              <span style="color:#60a5fa;">4.96점 (99.2%)</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" data-width="99.2%"></div></div>
+          </div>
+        </div>
+
+        <div class="bar-chart-card">
+          <h3 style="font-size:1.05rem;">참여 선생님 학교급 분포</h3>
+          <div class="school-dist">
+            <div class="dist-mid" title="중학교 63.6%"></div>
+            <div class="dist-high" title="고등학교 27.1%"></div>
+            <div class="dist-elem" title="초등학교 8.5%"></div>
+            <div class="dist-etc" title="기타 0.8%"></div>
+          </div>
+          <div class="legend-row">
+            <span><i class="legend-dot" style="background:#3b82f6"></i>중학교 63.6% (75명)</span>
+            <span><i class="legend-dot" style="background:#10b981"></i>고등학교 27.1% (32명)</span>
+            <span><i class="legend-dot" style="background:#f59e0b"></i>초등학교 8.5% (10명)</span>
+            <span><i class="legend-dot" style="background:#8b5cf6"></i>기타 0.8% (1명)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 섹션 3: 생생 후기 -->
+      <section id="reviews" class="scroll-section">
+        <span class="badge">REAL VOICES · 사후설문 주관식 발췌</span>
+        <h2>"최근 다녔던 연수 중 가장 큰 도움이 되었습니다"</h2>
+        <p class="section-desc">
+          연수에 직접 참여하신 선생님들이 남겨주신 솔직한 소감입니다.
+        </p>
+
+        <div class="review-grid">
+          <div class="review-card">
+            <span class="review-tag">중학교 교사 · 데이터 누적 & AI 피드백</span>
+            <p class="review-text">
+              "수업 중에 항상 데이터가 쌓이고 관리하는 방법을 몰라 난감했는데, 데이터를 누적 관리하고 AI 개인 피드백까지 줄 수 있는 앱을 직접 만들어 활용할 수 있어 시간 가는 줄 몰랐습니다."
+            </p>
+          </div>
+          <div class="review-card">
+            <span class="review-tag">중학교 교사 · 코딩 입문자</span>
+            <p class="review-text">
+              "바이브 코딩에 대해 정보가 하나도 없어 막막했는데, 기초 설명을 이해하기 쉽게 알려주셔서 AI 활용 수업과 훨씬 가까워졌습니다. 최근 다녔던 연수 중 가장 큰 도움이 되었습니다."
+            </p>
+          </div>
+          <div class="review-card">
+            <span class="review-tag">고등학교 교사 · 작동 원리 이해</span>
+            <p class="review-text">
+              "단순히 따라 하는 방법이 아니라 왜 해야 하는지 원리를 구체적으로 설명해 주셔서 초보자 입장에서도 수업을 잘 따라갈 수 있었습니다."
+            </p>
+          </div>
+          <div class="review-card">
+            <span class="review-tag">중학교 교사 · 구글 시트 연동</span>
+            <p class="review-text">
+              "구글 앱스크립트를 통해 스프레드시트와 바이브 코딩 웹앱을 연결하는 실습이 정말 유익했습니다. 내 손으로 수업 자료를 만들 수 있다는 자신감이 생겼습니다."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 섹션 4: 핵심 커리큘럼 -->
+      <section id="curriculum" class="scroll-section">
+        <span class="badge">CURRICULUM · 단계별 실습 로드맵</span>
+        <h2>무작정 따라하기가 아닌, 원리를 이해하는 실습</h2>
+        <p class="section-desc">
+          기초 용어 정리부터 실제 수업에 즉시 투입 가능한 웹앱 완성까지 단계별로 함께합니다.
+        </p>
+
+        <div class="step-list">
+          <div class="step-item">
+            <span class="step-num">STEP 01</span>
+            <div>
+              <h3 style="font-size:1.05rem; margin-bottom:4px;">바이브 코딩 핵심 개념 및 AI 프롬프트 설계</h3>
+              <p style="font-size:0.92rem; color:var(--text-muted);">웹앱의 구조와 필수 용어를 쉽게 익히고, 원하는 기능을 정확히 구현하는 프롬프트 작성법을 익힙니다.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-num">STEP 02</span>
+            <div>
+              <h3 style="font-size:1.05rem; margin-bottom:4px;">구글 앱스크립트(Apps Script) & 스프레드시트 DB 연결</h3>
+              <p style="font-size:0.92rem; color:var(--text-muted);">학생들의 활동 기록이 일회성으로 사라지지 않고 구글 시트에 실시간으로 누적 저장되도록 연결합니다.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-num">STEP 03</span>
+            <div>
+              <h3 style="font-size:1.05rem; margin-bottom:4px;">Gemini API 연동 및 수업 맞춤형 웹앱 배포</h3>
+              <p style="font-size:0.92rem; color:var(--text-muted);">교과별 퀴즈, 수행평가 기록지, AI 자동 피드백 웹앱을 직접 제작하고 디버깅하여 현장에 바로 적용합니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 섹션 5: 참가 신청 안내 -->
+      <section id="apply" class="scroll-section">
+        <div class="cta-box">
+          <span class="badge">지금 바로 함께하세요</span>
+          <h2>선생님의 상상이 실제 수업 도구가 되는 시간</h2>
+          <p style="color:#cbd5e1; max-width:560px; margin:0 auto;">
+            만족도 5.0 만점의 검증된 실습 연수! 아래 버튼을 클릭하시면 참가신청 설문지 페이지로 바로 연결됩니다.
+          </p>
+          <a href="https://forms.gle/AcTvzWREaddjYviT6" target="_blank" rel="noopener noreferrer" class="cta-btn">
+            <span>연수 참가신청 바로가기</span>
+            <span>→</span>
+          </a>
+          <p style="font-size:0.84rem; color:var(--text-muted); margin-top:16px;">
+            신청 링크: https://forms.gle/AcTvzWREaddjYviT6
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sections = document.querySelectorAll('.scroll-section');
+      const navLinks = document.querySelectorAll('.toc-link');
+      const barFills = document.querySelectorAll('.bar-fill');
+
+      // 1. 스크롤 시 섹션 부드럽게 등장 & 막대 그래프 애니메이션
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+
+            if (entry.target.id === 'stats') {
+              barFills.forEach((bar) => {
+                bar.style.width = bar.getAttribute('data-width');
+              });
+            }
+          }
+        });
+      }, {
+        threshold: 0.15
+      });
+
+      sections.forEach((section) => revealObserver.observe(section));
+
+      // 2. 스크롤 위치에 따른 좌측 목차 하이라이트(불 들어오기)
+      const spyObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const currentId = entry.target.getAttribute('id');
+            navLinks.forEach((link) => {
+              link.classList.remove('active');
+              if (link.getAttribute('href') === `#${currentId}`) {
+                link.classList.add('active');
+              }
+            });
+          }
+        });
+      }, {
+        rootMargin: '-25% 0px -55% 0px',
+        threshold: 0
+      });
+
+      sections.forEach((section) => spyObserver.observe(section));
+    });
+  </script>
+
+</body>
+</html>
